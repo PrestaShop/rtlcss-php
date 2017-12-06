@@ -9,16 +9,27 @@
 
 namespace MoodleHQ\RTLCSS;
 
+use MoodleHQ\RTLCSS\Transformation\FlipBackground;
+use MoodleHQ\RTLCSS\Transformation\FlipBorderRadius;
+use MoodleHQ\RTLCSS\Transformation\FlipCursor;
+use MoodleHQ\RTLCSS\Transformation\FlipDirection;
+use MoodleHQ\RTLCSS\Transformation\FlipLeftProperty;
+use MoodleHQ\RTLCSS\Transformation\FlipLeftValue;
+use MoodleHQ\RTLCSS\Transformation\FlipMarginPaddingBorder;
+use MoodleHQ\RTLCSS\Transformation\FlipRightProperty;
+use MoodleHQ\RTLCSS\Transformation\FlipShadow;
+use MoodleHQ\RTLCSS\Transformation\FlipTransform;
+use MoodleHQ\RTLCSS\Transformation\FlipTransformOrigin;
+use MoodleHQ\RTLCSS\Transformation\FlipTransition;
+use MoodleHQ\RTLCSS\Transformation\TransformationInterface;
+use Sabberworm\CSS\Comment\Comment;
+use Sabberworm\CSS\CSSList\CSSBlockList;
 use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\CSSList\Document;
-use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Parser;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\RuleSet\RuleSet;
-use Sabberworm\CSS\Settings;
 use Sabberworm\CSS\Value\CSSFunction;
-use Sabberworm\CSS\Value\CSSString;
-use Sabberworm\CSS\Value\PrimitiveValue;
 use Sabberworm\CSS\Value\RuleValueList;
 use Sabberworm\CSS\Value\Size;
 use Sabberworm\CSS\Value\ValueList;
@@ -32,15 +43,61 @@ use Sabberworm\CSS\Value\ValueList;
  */
 class RTLCSS {
 
+    /**
+     * @var Document
+     */
     protected $tree;
+
+    /**
+     * @var array
+     */
     protected $shouldAddCss = [];
+
+    /**
+     * @var bool
+     */
     protected $shouldIgnore = false;
+
+    /**
+     * @var bool
+     */
     protected $shouldRemove = false;
 
+    /**
+     * @var TransformationInterface[]
+     */
+    protected $transformationQueue = [];
+
+    /**
+     * RTLCSS constructor.
+     *
+     * @param Document $tree
+     */
     public function __construct(Document $tree) {
         $this->tree = $tree;
+        $this->transformationQueue = [
+            new FlipDirection(),
+            new FlipLeftProperty(),
+            new FlipRightProperty(),
+            new FlipTransition(),
+            new FlipLeftValue(),
+            new FlipMarginPaddingBorder(),
+            new FlipBorderRadius(),
+            new FlipShadow(),
+            new FlipTransformOrigin(),
+            new FlipTransform(),
+            new FlipBackground(),
+            new FlipCursor(),
+        ];
     }
 
+    /**
+     * @param string $what
+     * @param string $to
+     * @param bool $ignoreCase
+     *
+     * @return bool
+     */
     protected function compare($what, $to, $ignoreCase) {
         if ($ignoreCase) {
             return strtolower($what) === strtolower($to);
@@ -48,6 +105,9 @@ class RTLCSS {
         return $what === $to;
     }
 
+    /**
+     * @param Size|CSSFunction $value
+     */
     protected function complement($value) {
         if ($value instanceof Size) {
             $value->setSize(100 - $value->getSize());
@@ -59,11 +119,17 @@ class RTLCSS {
         }
     }
 
+    /**
+     * @return Document
+     */
     public function flip() {
         $this->processBlock($this->tree);
         return $this->tree;
     }
 
+    /**
+     * @param ValueList|Size $value
+     */
     protected function negate($value) {
         if ($value instanceof ValueList) {
             foreach ($value->getListComponents() as $part) {
@@ -76,6 +142,9 @@ class RTLCSS {
         }
     }
 
+    /**
+     * @param Comment[] $comments
+     */
     protected function parseComments(array $comments) {
         $startRule = '^(\s|\*)*!?rtl:';
         foreach ($comments as $comment) {
@@ -98,6 +167,9 @@ class RTLCSS {
         }
     }
 
+    /**
+     * @param Rule $rule
+     */
     protected function processBackground(Rule $rule) {
         $value = $rule->getValue();
 
@@ -168,9 +240,13 @@ class RTLCSS {
         }
     }
 
+    /**
+     * @param CSSBlockList $block
+     */
     protected function processBlock($block) {
         $contents = [];
 
+        /** @var RuleSet $node */
         foreach ($block->getContents() as $node) {
             $this->parseComments($node->getComments());
 
@@ -199,6 +275,9 @@ class RTLCSS {
         $block->setContents($contents);
     }
 
+    /**
+     * @param RuleSet $node
+     */
     protected function processDeclaration($node) {
         $rules = [];
 
@@ -229,104 +308,22 @@ class RTLCSS {
         $node->setRules($rules);
     }
 
-    protected function processRule($rule) {
+    /**
+     * @param Rule $rule
+     */
+    protected function processRule(Rule $rule) {
         $property = $rule->getRule();
-        $value = $rule->getValue();
-
-        if (preg_match('/direction$/im', $property)) {
-            $rule->setValue($this->swapLtrRtl($value));
-
-        } else if (preg_match('/left/im', $property)) {
-            $rule->setRule(str_replace('left', 'right', $property));
-
-        } else if (preg_match('/right/im', $property)) {
-            $rule->setRule(str_replace('right', 'left', $property));
-
-        } else if (preg_match('/transition(-property)?$/i', $property)) {
-            $rule->setValue($this->swapLeftRight($value));
-
-        } else if (preg_match('/float|clear|text-align/i', $property)) {
-            $rule->setValue($this->swapLeftRight($value));
-
-        } else if (preg_match('/^(margin|padding|border-(color|style|width))$/i', $property)) {
-
-            if ($value instanceof RuleValueList) {
-                $values = $value->getListComponents();
-                $count = count($values);
-                if ($count == 4) {
-                    $right = $values[3];
-                    $values[3] = $values[1];
-                    $values[1] = $right;
-                }
-                $value->setListComponents($values);
+        foreach ($this->transformationQueue as $transformation) {
+            if ($transformation->appliesFor($property)) {
+                $transformation->transform($rule);
+                break;
             }
-
-        } else if (preg_match('/border-radius/i', $property)) {
-            if ($value instanceof RuleValueList) {
-
-                // Border radius can contain two lists separated by a slash.
-                $groups = $value->getListComponents();
-                if ($value->getListSeparator() !== '/') {
-                    $groups = [$value];
-                }
-                foreach ($groups as $group) {
-                    $values = $group->getListComponents();
-                    switch (count($values)) {
-                        case 2:
-                            $group->setListComponents(array_reverse($values));
-                            break;
-                        case 3:
-                            $group->setListComponents([$values[1], $values[0], $values[1], $values[2]]);
-                            break;
-                        case 4:
-                            $group->setListComponents([$values[1], $values[0], $values[3], $values[2]]);
-                            break;
-                    }
-                }
-            }
-
-        } else if (preg_match('/shadow/i', $property)) {
-            // TODO Fix upstream, each shadow should be in a RuleValueList.
-            if ($value instanceof RuleValueList) {
-                // negate($value->getListComponents()[0]);
-            }
-
-        } else if (preg_match('/transform-origin/i', $property)) {
-            $this->processTransformOrigin($rule);
-
-        } else if (preg_match('/^(?!text\-).*?transform$/i', $property)) {
-            // TODO Parse function parameters first.
-
-        } else if (preg_match('/background(-position(-x)?|-image)?$/i', $property)) {
-            $this->processBackground($rule);
-
-        } else if (preg_match('/cursor/i', $property)) {
-            $hasList = false;
-
-            $parts = [$value];
-            if ($value instanceof RuleValueList) {
-                $hastList = true;
-                $parts = $value->getListComponents();
-            }
-
-            foreach ($parts as $key => $part) {
-                if (!is_object($part)) {
-                    $parts[$key] = preg_replace_callback('/\b(ne|nw|se|sw|nesw|nwse)-resize/', function($matches) {
-                        return str_replace($matches[1], str_replace(['e', 'w', '*'], ['*', 'e', 'w'], $matches[1]), $matches[0]);
-                    }, $part);
-                }
-            }
-
-            if ($hasList) {
-                $value->setListComponents($parts);
-            } else {
-                $rule->setValue($parts[0]);
-            }
-
         }
-
     }
 
+    /**
+     * @param Rule $rule
+     */
     protected function processTransformOrigin(Rule $rule) {
         $value = $rule->getValue();
         $foundLeftOrRight = false;
@@ -376,6 +373,9 @@ class RTLCSS {
         }
     }
 
+    /**
+     * @return array
+     */
     protected function shouldAddCss() {
         if (!empty($this->shouldAddCss)) {
             $css = $this->shouldAddCss;
@@ -385,6 +385,9 @@ class RTLCSS {
         return [];
     }
 
+    /**
+     * @return bool
+     */
     protected function shouldIgnoreNext() {
         if ($this->shouldIgnore) {
             if (is_int($this->shouldIgnore)) {
@@ -395,6 +398,9 @@ class RTLCSS {
         return false;
     }
 
+    /**
+     * @return bool
+     */
     protected function shouldRemoveNext() {
         if ($this->shouldRemove) {
             if (is_int($this->shouldRemove)) {
@@ -405,6 +411,14 @@ class RTLCSS {
         return false;
     }
 
+    /**
+     * @param $value
+     * @param $a
+     * @param $b
+     * @param array $options
+     *
+     * @return null|string|string[]
+     */
     protected function swap($value, $a, $b, $options = ['scope' => '*', 'ignoreCase' => true]) {
         $expr = preg_quote($a) . '|' . preg_quote($b);
         if (!empty($options['greedy'])) {
@@ -417,10 +431,20 @@ class RTLCSS {
         }, $value);
     }
 
+    /**
+     * @param $value
+     *
+     * @return null|string|string[]
+     */
     protected function swapLeftRight($value) {
         return $this->swap($value, 'left', 'right');
     }
 
+    /**
+     * @param $value
+     *
+     * @return null|string|string[]
+     */
     protected function swapLtrRtl($value) {
         return $this->swap($value, 'ltr', 'rtl');
     }
