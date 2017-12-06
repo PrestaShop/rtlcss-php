@@ -4,17 +4,16 @@
     "description": "Convert CSS to Right-to-Left (Port of RTLCSS)",
     "keywords": ["rtl", "css"],
     "license": "MIT",
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.4",
-        "sabberworm/php-css-parser": "*"
+        "sabberworm/php-css-parser": "^8.1"
     },
     "require-dev": {
         "phpunit/phpunit": "*"
     },
     "autoload": {
         "psr-4": {
-            "MoodleHQ\\": "src/MoodleHQ"
+            "MoodleHQ\\RTLCSS\\": "src/MoodleHQ/RTLCSS/"
         }
     }
 }
