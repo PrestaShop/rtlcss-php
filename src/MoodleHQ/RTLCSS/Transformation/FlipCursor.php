@@ -34,9 +34,26 @@ class FlipCursor implements TransformationInterface
 
         foreach ($parts as $key => $part) {
             if (!is_object($part)) {
-                $parts[$key] = preg_replace_callback('/\b(ne|nw|se|sw|nesw|nwse)-resize/', function($matches) {
-                    return str_replace($matches[1], str_replace(['e', 'w', '*'], ['*', 'e', 'w'], $matches[1]), $matches[0]);
-                }, $part);
+                $parts[$key] = preg_replace_callback(
+                    '/\b([news]{1,4})(?=-resize)/',
+                    function($matches) {
+                        $token = $matches[1];
+                        if (strlen($token) <= 2) {
+                            // "ew" should not be flipped
+                            if ($token !== 'ew') {
+                                return strtr($token, ['e' => 'w', 'w' => 'e']);
+                            }
+                        } else if ($token === 'nesw') {
+                            return 'nwse';
+                        } else if ($token === 'nwse') {
+                            return 'nesw';
+                        }
+
+                        // no change
+                        return $token;
+                    },
+                    $part
+                );
             }
         }
 
