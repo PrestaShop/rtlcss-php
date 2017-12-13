@@ -13,7 +13,7 @@ class FlipLeftProperty implements TransformationInterface
      */
     public function appliesFor($property)
     {
-        return (preg_match('/left/im', $property) === 1);
+        return (preg_match('/\bleft\b/im', $property) === 1);
     }
 
     /**
