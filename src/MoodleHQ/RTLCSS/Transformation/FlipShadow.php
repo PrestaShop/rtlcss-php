@@ -1,11 +1,23 @@
 <?php
 namespace MoodleHQ\RTLCSS\Transformation;
 
+use MoodleHQ\RTLCSS\Transformation\Operation\SizeFlipper;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\Value\RuleValueList;
+use Sabberworm\CSS\Value\Size;
 
 class FlipShadow implements TransformationInterface
 {
+    /**
+     * @var SizeFlipper
+     */
+    private $sizeFlipper;
+
+    public function __construct()
+    {
+        $this->sizeFlipper = new SizeFlipper();
+    }
+
     /**
      * @inheritDoc
      */
@@ -21,9 +33,40 @@ class FlipShadow implements TransformationInterface
     {
         $value = $rule->getValue();
 
-        // TODO Fix upstream, each shadow should be in a RuleValueList.
+        // Flip X offset
         if ($value instanceof RuleValueList) {
-            // negate($value->getListComponents()[0]);
+            $parameters = $value->getListComponents();
+            $index = $this->getOffsetXIndex($rule);
+            /** @var Size $oldX */
+            $oldX = $parameters[$index];
+            $parameters[$index] = $this->sizeFlipper->invertSize($oldX);
+
+            $value->setListComponents($parameters);
         }
+    }
+
+    /**
+     * Retrieve the index of the X offset within the rule values
+     *
+     * @param Rule $rule
+     *
+     * @return int
+     * @throws TransformationException
+     */
+    private function getOffsetXIndex(Rule $rule)
+    {
+        $property = $rule->getRule();
+        $value = $rule->getValue();
+        if ($value instanceof RuleValueList) {
+            $parameters = $value->getListComponents();
+            // the offset X parameter can be either the 1st or 2nd parameter
+            foreach ([0, 1] as $i) {
+                if (isset($parameters[$i]) && $parameters[$i] instanceof Size) {
+                    return $i;
+                }
+            }
+        }
+
+        throw new TransformationException("Invalid value for \"$property\"");
     }
 }
