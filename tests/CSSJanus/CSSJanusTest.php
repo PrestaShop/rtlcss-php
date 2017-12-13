@@ -17,7 +17,8 @@ class CSSJanusTest extends \PHPUnit_Framework_TestCase
             ->set('SpaceAfterRules', ' ')
             ->set('SpaceBetweenRules', ' ')
             ->set('SpaceBetweenBlocks', ' ')
-            ->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' '));
+            ->set('SpaceBeforeListArgumentSeparator', array('default' => '', '/' => ' '))
+            ->set('SpaceAfterListArgumentSeparator', array('default' => '', ',' => ' ', '/' => ' '));
 
         $parser = new Parser($input);
         $tree = $parser->parse();
@@ -62,7 +63,7 @@ class CSSJanusTest extends \PHPUnit_Framework_TestCase
                     $cases["$caseName (undo)"] = array(
                         $output,
                         $args,
-                        $input,
+                        isset($case[2]) ? $case[2] : $input,
                         "$caseName (undo)",
                     );
                 }
