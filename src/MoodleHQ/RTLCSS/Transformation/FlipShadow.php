@@ -37,12 +37,16 @@ class FlipShadow implements TransformationInterface
         if ($value instanceof RuleValueList) {
             $parameters = $value->getListComponents();
             $index = $this->getOffsetXIndex($rule);
-            /** @var Size $oldX */
-            $oldX = $parameters[$index];
-            $parameters[$index] = $this->sizeFlipper->invertSize($oldX);
+            if ($index >= 0) {
+                /** @var Size $oldX */
+                $oldX = $parameters[$index];
+                $parameters[$index] = $this->sizeFlipper->invertSize($oldX);
 
-            $value->setListComponents($parameters);
+                $value->setListComponents($parameters);
+            }
         }
+
+        return $value;
     }
 
     /**
@@ -51,11 +55,9 @@ class FlipShadow implements TransformationInterface
      * @param Rule $rule
      *
      * @return int
-     * @throws TransformationException
      */
     private function getOffsetXIndex(Rule $rule)
     {
-        $property = $rule->getRule();
         $value = $rule->getValue();
         if ($value instanceof RuleValueList) {
             $parameters = $value->getListComponents();
@@ -67,6 +69,7 @@ class FlipShadow implements TransformationInterface
             }
         }
 
-        throw new TransformationException("Invalid value for \"$property\"");
+        // handle other types like RuleValueList gracefully
+        return -1;
     }
 }
