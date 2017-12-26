@@ -44,6 +44,74 @@ class RTLCSSTest extends \PHPUnit_Framework_TestCase {
     public function backgroundPositionProvider() {
         return [
             [[
+                 'should' => 'Should mirror position (keywords only)',
+                 'expected' => 'div {background-position:top left, right bottom}',
+                 'input' => 'div {background-position:top right, left bottom}',
+                 'reversable' => true,
+                 'skip' => true, // broken in PHPCssParser: https://github.com/sabberworm/PHP-CSS-Parser/issues/123
+            ]],
+            [[
+                 'should' => 'Should ignore mirroring invalid position',
+                 'expected' => 'div {background-position:25% left, right 25%;}',
+                 'input' => 'div {background-position:75% left, left 25%;}',
+                 'reversable' => true,
+                 'skip' => true, // broken in PHPCssParser: https://github.com/sabberworm/PHP-CSS-Parser/issues/123
+            ]],
+            [[
+                 'should' => 'Should complement percentage horizontal position',
+                 'expected' => 'div {background-position:25%;}',
+                 'input' => 'div {background-position:75%;}',
+                 'reversable' => true
+            ]],
+            [[
+                 'should' => 'Should flip left offset',
+                 'expected' => 'div {background-position:right 25px center;}',
+                 'input' => 'div {background-position:left 25px center;}',
+                 'reversable' => true,
+            ]],
+            [[
+                 'should' => 'Should flip left and right',
+                 'expected' => 'div {background-position:right;}',
+                 'input' => 'div {background-position:left;}',
+                 'reversable' => true
+            ]],
+            [[
+                 'should' => 'Should not flip top',
+                 'expected' => 'div {background-position:top;}',
+                 'input' => 'div {background-position:top;}',
+                 'reversable' => true
+            ]],
+            [[
+                 'should' => 'Should not flip bottom',
+                 'expected' => 'div {background-position:bottom;}',
+                 'input' => 'div {background-position:bottom;}',
+                 'reversable' => true
+            ]],
+            [[
+                 'should' => 'Should flip X offset but not Y offset',
+                 'expected' => 'div {background-position:left 25px top;}',
+                 'input' => 'div {background-position:right 25px top;}',
+                 'reversable' => true,
+            ]],
+            [[
+                 'should' => 'Should flip X offset but not Y offset',
+                 'expected' => 'div {background-position:25% bottom;}',
+                 'input' => 'div {background-position:75% bottom;}',
+                 'reversable' => true
+            ]],
+            [[
+                 'should' => 'Should flip X offset but not Y offset',
+                 'expected' => 'div {background-position:left top;}',
+                 'input' => 'div {background-position:right top;}',
+                 'reversable' => true
+            ]],
+            [[
+                 'should' => 'Should flip X offset but not Y offset',
+                 'expected' => 'div {background-position:bottom right;}',
+                 'input' => 'div {background-position:bottom left;}',
+                 'reversable' => true
+            ]],
+            [[
                 'should' => 'Should complement percentage horizontal position ',
                 'expected' => 'div {background-position:100% 75%;}',
                 'input' => 'div {background-position:0 75%;}',
@@ -71,23 +139,23 @@ class RTLCSSTest extends \PHPUnit_Framework_TestCase {
                 'skip' => true
             ]],
             [[
-                'should' => 'Should swap left with right',
+                'should' => 'Should mirror background-position',
                 'expected' => 'div {background-position:right 75%, left top;}',
                 'input' => 'div {background-position:left 75%, right top;}',
                 'reversable' => true,
                 'skip' => true
             ]],
             [[
-                'should' => 'Should swap left with right wit calc',
+                'should' => 'Should mirror background-position (calc)',
                 'expected' => 'div {background-position:right -ms-calc(30% + 50px), left top;}',
                 'input' => 'div {background-position:left -ms-calc(30% + 50px), right top;}',
                 'reversable' => true,
                 'skip' => true
             ]],
             [[
-                'should' => 'Should complement percentage: position-x (treat 0 as 0%)',
+                'should' => 'Should complement percentage: position-x',
                 'expected' => 'div {background-position-x:100%, 0%;}',
-                'input' => 'div {background-position-x:0, 100%;}',
+                'input' => 'div {background-position-x:0%, 100%;}',
                 'reversable' => false
             ]],
             [[
@@ -101,21 +169,35 @@ class RTLCSSTest extends \PHPUnit_Framework_TestCase {
                 'expected' => 'div {background-position-x:calc(100% - (30% + 50px)), -webkit-calc(100% - (30% + 50px));}',
                 'input' => 'div {background-position-x:calc(30% + 50px), -webkit-calc(30% + 50px);}',
                 'reversable' => false,
-                'skip' => true
+                'skip' => true, // calc is not parsed by PHPCssParser
             ]],
             [[
-                'should' => 'Should swap left with right: position-x',
+                'should' => 'Should mirror position-x',
                 'expected' => 'div {background-position-x:right, left;}',
                 'input' => 'div {background-position-x:left, right;}',
                 'reversable' => true
             ]],
             [[
-                'should' => 'Should keep as is: position-x',
-                'expected' => 'div {background-position-x:100px, 0px;}',
-                'input' => 'div {background-position-x:100px, 0px;}',
-                'reversable' => true
+                 'should' => 'Should mirror position-x (calc)',
+                 'expected' => 'div {background-position-x:calc(100% - (30% + 50px)), calc(100% - (50px * 5));}',
+                 'input' => 'div {background-position-x:calc(30% + 50px), calc(50px * 5);}',
+                 'reversable' => false,
+                 'skip' => true, // calc is not parsed by PHPCssParser
+             ]],
+            [[
+                 'should' => 'Should mirror background-position edge offsets (4 values)',
+                 'expected' => 'div {background-position:left 5px bottom 5px, bottom 15px right 15px;}',
+                 'input' => 'div {background-position:right 5px bottom 5px, bottom 15px left 15px;}',
+                 'reversable' => true,
+                 'skip' => true, // broken in PHPCssParser: https://github.com/sabberworm/PHP-CSS-Parser/issues/123
             ]],
-
+            [[
+                 'should' => 'Should mirror background-position edge offsets (3 values)',
+                 'expected' => 'div {background-position:left 5px bottom, top 15px right;}',
+                 'input' => 'div {background-position:right 5px bottom, top 15px left;}',
+                 'reversable' => true,
+                 'skip' => true, // broken in PHPCssParser: https://github.com/sabberworm/PHP-CSS-Parser/issues/123
+            ]],
             [[
                 'should' => 'Should flip when using 3 positions',
                 'expected' => 'div {background-position:center right 1px;}',
@@ -166,13 +248,13 @@ class RTLCSSTest extends \PHPUnit_Framework_TestCase {
             ]],
             [[
                 'should' => 'Should not process string map in url (default)',
-                'expected' => '.banner { background: 10px top url("ltr-top-right-banner.png") #00d repeat-y fixed; }',
+                'expected' => '.banner { background: right 10px top url("ltr-top-right-banner.png") #00d repeat-y fixed; }',
                 'input' => '.banner { background: 10px top url("ltr-top-right-banner.png") #00d repeat-y fixed; }',
                 'reversable' => true
             ]],
             [[
                 'should' => 'Should process string map in url (processUrls:true)',
-                'expected' => '.banner { background: 10px top url(rtl-top-left-banner.png) #00d repeat-y fixed; }',
+                'expected' => '.banner { background: right 10px top url(rtl-top-left-banner.png) #00d repeat-y fixed; }',
                 'input' => '.banner { background: 10px top url(ltr-top-right-banner.png) #00d repeat-y fixed; }',
                 'reversable' => true,
                 'options' => [ 'processUrls' => true ],
@@ -180,7 +262,7 @@ class RTLCSSTest extends \PHPUnit_Framework_TestCase {
             ]],
             [[
                 'should' => 'Should process string map in url (processUrls:{decl:true})',
-                'expected' => '.banner { background: 10px top url(rtl-top-left-banner.png) #00d repeat-y fixed; }',
+                'expected' => '.banner { background: right 10px top url(rtl-top-left-banner.png) #00d repeat-y fixed; }',
                 'input' => '.banner { background: 10px top url(ltr-top-right-banner.png) #00d repeat-y fixed; }',
                 'reversable' => true,
                 'options' => [ 'processUrls' => [ 'decl' => true ] ],
@@ -188,20 +270,20 @@ class RTLCSSTest extends \PHPUnit_Framework_TestCase {
             ]],
             [[
                 'should' => 'Should not process string map in url (processUrls:{atrule:true})',
-                'expected' => '.banner { background: 10px top url("ltr-top-right-banner.png") #00d repeat-y fixed; }',
+                'expected' => '.banner { background: right 10px top url("ltr-top-right-banner.png") #00d repeat-y fixed; }',
                 'input' => '.banner { background: 10px top url("ltr-top-right-banner.png") #00d repeat-y fixed; }',
                 'reversable' => true,
                 'options' => [ 'processUrls' => [ 'atrule' => true ] ]
             ]],
             [[
                 'should' => 'Should not swap bright:bleft, ultra:urtla',
-                'expected' => '.banner { background: 10px top url("ultra/bright.png") #00d repeat-y fixed; }',
+                'expected' => '.banner { background: right 10px top url("ultra/bright.png") #00d repeat-y fixed; }',
                 'input' => '.banner { background: 10px top url("ultra/bright.png") #00d repeat-y fixed; }',
                 'reversable' => true
             ]],
             [[
                 'should' => 'Should swap bright:bleft, ultra:urtla (processUrls: true, greedy)',
-                'expected' => '.banner { background: 10px top url("urtla/bleft.png") #00d repeat-y fixed; }',
+                'expected' => '.banner { background: right 10px top url("urtla/bleft.png") #00d repeat-y fixed; }',
                 'input' => '.banner { background: 10px top url("ultra/bright.png") #00d repeat-y fixed; }',
                 'reversable' => true,
                 'options' => [ 'processUrls' => true, 'greedy' => true ],
