@@ -101,54 +101,11 @@ class RTLCSS {
     }
 
     /**
-     * @param string $what
-     * @param string $to
-     * @param bool $ignoreCase
-     *
-     * @return bool
-     */
-    protected function compare($what, $to, $ignoreCase) {
-        if ($ignoreCase) {
-            return strtolower($what) === strtolower($to);
-        }
-        return $what === $to;
-    }
-
-    /**
-     * @param Size|CSSFunction $value
-     */
-    protected function complement($value) {
-        if ($value instanceof Size) {
-            $value->setSize(100 - $value->getSize());
-
-        } else if ($value instanceof CSSFunction) {
-            $arguments = implode($value->getListSeparator(), $value->getArguments());
-            $arguments = "100% - ($arguments)";
-            $value->setListComponents([$arguments]);
-        }
-    }
-
-    /**
      * @return Document
      */
     public function flip() {
         $this->processBlock($this->tree);
         return $this->tree;
-    }
-
-    /**
-     * @param ValueList|Size $value
-     */
-    protected function negate($value) {
-        if ($value instanceof ValueList) {
-            foreach ($value->getListComponents() as $part) {
-                $this->negate($part);
-            }
-        } else if ($value instanceof Size) {
-            if ($value->getSize() != 0) {
-                $value->setSize(-$value->getSize());
-            }
-        }
     }
 
     /**
@@ -176,78 +133,6 @@ class RTLCSS {
         }
     }
 
-    /**
-     * @param Rule $rule
-     */
-    protected function processBackground(Rule $rule) {
-        $value = $rule->getValue();
-
-        // TODO Fix upstream library as it does not parse this well, commas don't take precedence.
-        // There can be multiple sets of properties per rule.
-        $hasItems = false;
-        $items = [$value];
-        if ($value instanceof RuleValueList && $value->getListSeparator() == ',') {
-            $hasItems = true;
-            $items = $value->getListComponents();
-        }
-
-        // Foreach set.
-        foreach ($items as $itemKey => $item) {
-
-            // There can be multiple values in the same set.
-            $hasValues = false;
-            $parts = [$item];
-            if ($item instanceof RuleValueList) {
-                $hasValues = true;
-                $parts = $value->getListComponents();
-            }
-
-            $requiresPositionalArgument = false;
-            $hasPositionalArgument = false;
-            foreach ($parts as $key => $part) {
-                $part = $parts[$key];
-
-                if (!is_object($part)) {
-                    $flipped = $this->swapLeftRight($part);
-
-                    // Positional arguments can have a size following.
-                    $hasPositionalArgument = $parts[$key] != $flipped;
-                    $requiresPositionalArgument = true;
-
-                    $parts[$key] = $flipped;
-                    continue;
-
-                } else if ($part instanceof CSSFunction && strpos($part->getName(), 'gradient') !== false) {
-                    // TODO Fix this.
-
-                } else if ($part instanceof Size && ($part->getUnit() === '%' || !$part->getUnit())) {
-
-                    // Is this a value we're interested in?
-                    if (!$requiresPositionalArgument || $hasPositionalArgument) {
-                        $this->complement($part);
-                        $part->setUnit('%');
-                        // We only need to change one value.
-                        break;
-                    }
-
-                }
-
-                $hasPositionalArgument = false;
-            }
-
-            if ($hasValues) {
-                $item->setListComponents($parts);
-            } else {
-                $items[$itemKey] = $parts[$key];
-            }
-        }
-
-        if ($hasItems) {
-            $value->setListComponents($items);
-        } else {
-            $rule->setValue($items[0]);
-        }
-    }
 
     /**
      * @param CSSBlockList $block
@@ -331,58 +216,6 @@ class RTLCSS {
     }
 
     /**
-     * @param Rule $rule
-     */
-    protected function processTransformOrigin(Rule $rule) {
-        $value = $rule->getValue();
-        $foundLeftOrRight = false;
-
-        // Search for left or right.
-        $parts = [$value];
-        if ($value instanceof RuleValueList) {
-            $parts = $value->getListComponents();
-            $isInList = true;
-        }
-        foreach ($parts as $key => $part) {
-            if (!is_object($part) && preg_match('/left|right/i', $part)) {
-                $foundLeftOrRight = true;
-                $parts[$key] = $this->swapLeftRight($part);
-            }
-        }
-
-        if ($foundLeftOrRight) {
-            // We need to reconstruct the value because left/right are not represented by an object.
-            $list = new RuleValueList(' ');
-            $list->setListComponents($parts);
-            $rule->setValue($list);
-
-        } else {
-
-            $value = $parts[0];
-            // The first value may be referencing top or bottom (y instead of x).
-            if (!is_object($value) && preg_match('/top|bottom/i', $value)) {
-                $value = $parts[1];
-            }
-
-            // Flip the value.
-            if ($value instanceof Size) {
-
-                if ($value->getSize() == 0) {
-                    $value->setSize(100);
-                    $value->setUnit('%');
-
-                } else if ($value->getUnit() === '%') {
-                    $this->complement($value);
-                }
-
-            } else if ($value instanceof CSSFunction && strpos($value->getName(), 'calc') !== false) {
-                // TODO Fix upstream calc parsing.
-                $this->complement($value);
-            }
-        }
-    }
-
-    /**
      * @return array
      */
     protected function shouldAddCss() {
@@ -419,43 +252,4 @@ class RTLCSS {
         }
         return false;
     }
-
-    /**
-     * @param $value
-     * @param $a
-     * @param $b
-     * @param array $options
-     *
-     * @return null|string|string[]
-     */
-    protected function swap($value, $a, $b, $options = ['scope' => '*', 'ignoreCase' => true]) {
-        $expr = preg_quote($a) . '|' . preg_quote($b);
-        if (!empty($options['greedy'])) {
-            $expr = '\\b(' . $expr . ')\\b';
-        }
-        $flags = !empty($options['ignoreCase']) ? 'im' : 'm';
-        $expr = "/$expr/$flags";
-        return preg_replace_callback($expr, function($matches) use ($a, $b, $options) {
-            return $this->compare($matches[0], $a, !empty($options['ignoreCase'])) ? $b : $a;
-        }, $value);
-    }
-
-    /**
-     * @param $value
-     *
-     * @return null|string|string[]
-     */
-    protected function swapLeftRight($value) {
-        return $this->swap($value, 'left', 'right');
-    }
-
-    /**
-     * @param $value
-     *
-     * @return null|string|string[]
-     */
-    protected function swapLtrRtl($value) {
-        return $this->swap($value, 'ltr', 'rtl');
-    }
-
 }
