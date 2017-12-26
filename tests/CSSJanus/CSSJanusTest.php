@@ -1,6 +1,7 @@
 <?php
 namespace CSSJanus;
 
+use MoodleHQ\RTLCSS\FlipOptions;
 use MoodleHQ\RTLCSS\RTLCSS;
 use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Parser;
@@ -22,7 +23,11 @@ class CSSJanusTest extends \PHPUnit_Framework_TestCase
 
         $parser = new Parser($input);
         $tree = $parser->parse();
-        $rtlcss = new RTLCSS($tree);
+        $options = (new FlipOptions())
+            ->setShouldFlipBackgroundPositionLengthValue(false)
+            ->setShouldTreatBackgroundPositionZeroAsLengthValue(false)
+        ;
+        $rtlcss = new RTLCSS($tree, $options);
         $flipped = $rtlcss->flip();
 
         $this->assertEquals(

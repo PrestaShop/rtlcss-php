@@ -64,17 +64,26 @@ class RTLCSS {
     protected $shouldRemove = false;
 
     /**
+     * List of transformations to perform for each property, in order
      * @var TransformationInterface[]
      */
     protected $transformationQueue = [];
 
     /**
+     * Options specifying opinionated flipping choices
+     * @var FlipOptions
+     */
+    protected $options;
+
+    /**
      * RTLCSS constructor.
      *
      * @param Document $tree
+     * @param FlipOptions $options [default=null]
      */
-    public function __construct(Document $tree) {
+    public function __construct(Document $tree, FlipOptions $options = null) {
         $this->tree = $tree;
+        $this->options = ($options !== null) ? $options : new FlipOptions();
         $this->transformationQueue = [
             new FlipDirection(),
             new FlipLeftProperty(),
@@ -86,7 +95,7 @@ class RTLCSS {
             new FlipShadow(),
             new FlipTransformOrigin(),
             new FlipTransform(),
-            new FlipBackground(),
+            new FlipBackground($this->options),
             new FlipCursor(),
         ];
     }
