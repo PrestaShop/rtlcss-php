@@ -28,6 +28,7 @@ use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\CSSList\Document;
 use Sabberworm\CSS\Parser;
 use Sabberworm\CSS\Rule\Rule;
+use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\RuleSet\RuleSet;
 use Sabberworm\CSS\Value\CSSFunction;
 use Sabberworm\CSS\Value\RuleValueList;
@@ -135,12 +136,12 @@ class RTLCSS {
 
 
     /**
-     * @param CSSBlockList $block
+     * @param CSSBlockList|CSSList $block
      */
     protected function processBlock($block) {
         $contents = [];
 
-        /** @var RuleSet $node */
+        /** @var DeclarationBlock|CSSList|RuleSet $node */
         foreach ($block->getContents() as $node) {
             $this->parseComments($node->getComments());
 
@@ -153,8 +154,9 @@ class RTLCSS {
 
             if ($this->shouldRemoveNext()) {
                 continue;
+            }
 
-            } else if (!$this->shouldIgnoreNext()) {
+            if (!$this->shouldIgnoreNext()) {
                 if ($node instanceof CSSList) {
                     $this->processBlock($node);
                 }
@@ -170,11 +172,15 @@ class RTLCSS {
     }
 
     /**
-     * @param RuleSet $node
+     * @param DeclarationBlock|RuleSet $node
      */
     protected function processDeclaration($node) {
         $rules = [];
 
+        /**
+         * @var int $key
+         * @var Rule $rule
+         */
         foreach ($node->getRules() as $key => $rule) {
             $this->parseComments($rule->getComments());
 
@@ -182,7 +188,9 @@ class RTLCSS {
                 foreach ($toAdd as $add) {
                     $parser = new Parser('.wrapper{' . $add . '}');
                     $tree = $parser->parse();
+                    /** @var DeclarationBlock[] $contents */
                     $contents = $tree->getContents();
+                    /** @var Rule $newRule */
                     foreach ($contents[0]->getRules() as $newRule) {
                         $rules[] = $newRule;
                     }
@@ -191,8 +199,9 @@ class RTLCSS {
 
             if ($this->shouldRemoveNext()) {
                 continue;
+            }
 
-            } else if (!$this->shouldIgnoreNext()) {
+            if (!$this->shouldIgnoreNext()) {
                 $this->processRule($rule);
             }
 
