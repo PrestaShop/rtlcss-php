@@ -2,26 +2,25 @@
 /**
  * RTLCSS.
  *
- * @package   MoodleHQ\RTLCSS
- * @copyright 2016 Frédéric Massart - FMCorz.net
+ * Based in original work by Frédéric Massart - FMCorz.net
  * @license   https://opensource.org/licenses/MIT MIT
  */
 
-namespace MoodleHQ\RTLCSS;
+namespace PrestaShop\RtlCss;
 
-use MoodleHQ\RTLCSS\Transformation\FlipBackground;
-use MoodleHQ\RTLCSS\Transformation\FlipBorderRadius;
-use MoodleHQ\RTLCSS\Transformation\FlipCursor;
-use MoodleHQ\RTLCSS\Transformation\FlipDirection;
-use MoodleHQ\RTLCSS\Transformation\FlipLeftProperty;
-use MoodleHQ\RTLCSS\Transformation\FlipLeftValue;
-use MoodleHQ\RTLCSS\Transformation\FlipMarginPaddingBorder;
-use MoodleHQ\RTLCSS\Transformation\FlipRightProperty;
-use MoodleHQ\RTLCSS\Transformation\FlipShadow;
-use MoodleHQ\RTLCSS\Transformation\FlipTransform;
-use MoodleHQ\RTLCSS\Transformation\FlipTransformOrigin;
-use MoodleHQ\RTLCSS\Transformation\FlipTransition;
-use MoodleHQ\RTLCSS\Transformation\TransformationInterface;
+use PrestaShop\RtlCss\Transformation\FlipBackground;
+use PrestaShop\RtlCss\Transformation\FlipBorderRadius;
+use PrestaShop\RtlCss\Transformation\FlipCursor;
+use PrestaShop\RtlCss\Transformation\FlipDirection;
+use PrestaShop\RtlCss\Transformation\FlipLeftProperty;
+use PrestaShop\RtlCss\Transformation\FlipLeftValue;
+use PrestaShop\RtlCss\Transformation\FlipMarginPaddingBorder;
+use PrestaShop\RtlCss\Transformation\FlipRightProperty;
+use PrestaShop\RtlCss\Transformation\FlipShadow;
+use PrestaShop\RtlCss\Transformation\FlipTransform;
+use PrestaShop\RtlCss\Transformation\FlipTransformOrigin;
+use PrestaShop\RtlCss\Transformation\FlipTransition;
+use PrestaShop\RtlCss\Transformation\TransformationInterface;
 use Sabberworm\CSS\Comment\Comment;
 use Sabberworm\CSS\CSSList\CSSBlockList;
 use Sabberworm\CSS\CSSList\CSSList;
@@ -30,19 +29,11 @@ use Sabberworm\CSS\Parser;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\RuleSet\RuleSet;
-use Sabberworm\CSS\Value\CSSFunction;
-use Sabberworm\CSS\Value\RuleValueList;
-use Sabberworm\CSS\Value\Size;
-use Sabberworm\CSS\Value\ValueList;
 
 /**
- * RTLCSS Class.
- *
- * @package   MoodleHQ\RTLCSS
- * @copyright 2016 Frédéric Massart - FMCorz.net
- * @license   https://opensource.org/licenses/MIT MIT
+ * Converts CSS to RTL
  */
-class RTLCSS {
+class RtlCss {
 
     /**
      * @var Document

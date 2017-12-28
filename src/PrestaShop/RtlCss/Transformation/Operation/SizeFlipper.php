@@ -1,5 +1,5 @@
 <?php
-namespace MoodleHQ\RTLCSS\Transformation\Operation;
+namespace PrestaShop\RtlCss\Transformation\Operation;
 
 use Sabberworm\CSS\Value\Size;
 

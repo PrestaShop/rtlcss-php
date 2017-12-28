@@ -1,7 +1,7 @@
 <?php
-namespace MoodleHQ\RTLCSS\Transformation;
+namespace PrestaShop\RtlCss\Transformation;
 
-use MoodleHQ\RTLCSS\Transformation\Value\TransformableStringValue;
+use PrestaShop\RtlCss\Transformation\Value\TransformableStringValue;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\Value\CSSFunction;
 use Sabberworm\CSS\Value\RuleValueList;
@@ -54,7 +54,7 @@ class FlipTransformOrigin implements TransformationInterface
 
             $value = $parts[0];
             // The first value may be referencing top or bottom (y instead of x).
-            if (!is_object($value) && preg_match('/top|bottom/i', $value)) {
+            if (!is_object($value) && preg_match('/top|bottom/i', $value) && isset($parts[1])) {
                 $value = $parts[1];
             }
 

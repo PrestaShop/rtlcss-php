@@ -5,7 +5,8 @@
     bootstrap="tests/bootstrap.php">
     <testsuites>
         <testsuite name="Project Test Suite">
-            <directory>tests/MoodleHQ</directory>
+            <directory>tests/PrestaShop</directory>
+            <directory>tests/CSSJanus</directory>
         </testsuite>
     </testsuites>
     <filter>

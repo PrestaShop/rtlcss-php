@@ -1,7 +1,7 @@
-RTLCSS for PHP
---------------
+RtlCss
+------
 
-RTLCSS is a framework for converting Left-To-Right (LTR) Cascading Style Sheets(CSS) to Right-To-Left (RTL).
+RtlCss is a library for converting Left-To-Right (LTR) Cascading Style Sheets(CSS) to Right-To-Left (RTL).
 
 ## Usage
 
@@ -11,12 +11,8 @@ Add the library to your composer.json
 
 ```json
 {
-    "repositories": [{
-        "type": "vcs",
-        "url": "https://github.com/moodlehq/rtlcss-php"
-    }],
-    "require-dev": {
-        "moodlehq/rtlcss-php": "*"
+    "require": {
+        "prestashop/rtlcss-php": "*"
     }
 }
 ```
@@ -26,12 +22,12 @@ Add the library to your composer.json
 ```php
 $parser = new Sabberworm\CSS\Parser($css);
 $tree = $parser->parse()
-$rtlcss = new MoodleHQ\RTLCSS\RTLCSS($tree);
+$rtlcss = new PrestaShop\RtlCss\RtlCss($tree);
 $rtlcss->flip();
 echo $tree->render();
 ```
 
-For parsing options and rendering, refer to [Sabberworm/PHP-CSS-Parser](https://github.com/sabberworm/PHP-CSS-Parser).
+For parsing options and rendering, refer to [PrestaShop/PHP-CSS-Parser](https://github.com/PrestaShop/PHP-CSS-Parser).
 
 ## Output sample
 
@@ -178,7 +174,9 @@ This tool is very heavily inspired by [MohammadYounes/rtlcss](https://github.com
 
 ## Credits
 
+* [moodlehq/rtlcss-php](https://github.com/moodlehq/rtlcss-php) Original work
 * [MohammadYounes/rtlcss](https://github.com/MohammadYounes/rtlcss) for being the example we followed.
+* [cssjanus/php-cssjanus](https://github.com/cssjanus/php-cssjanus/) for providing additional test cases.
 * [Sabberworm/PHP-CSS-Parser](https://github.com/sabberworm/PHP-CSS-Parser) for parsing CSS in PHP.
 
 ## License

@@ -1,6 +1,6 @@
 <?php
 
-namespace MoodleHQ\RTLCSS;
+namespace PrestaShop\RtlCss;
 
 /**
  * Options for RTL CSS

@@ -1,19 +1,19 @@
 <?php
-namespace MoodleHQ\RTLCSS\Transformation;
+namespace PrestaShop\RtlCss\Transformation;
 
 use Sabberworm\CSS\Rule\Rule;
 
 /**
- * Flips properties containing 'left' to 'right'
+ * Flips properties containing 'right' to 'left'
  */
-class FlipLeftProperty implements TransformationInterface
+class FlipRightProperty implements TransformationInterface
 {
     /**
      * @inheritDoc
      */
     public function appliesFor($property)
     {
-        return (preg_match('/\bleft\b/im', $property) === 1);
+        return (preg_match('/\bright\b/im', $property) === 1);
     }
 
     /**
@@ -23,7 +23,7 @@ class FlipLeftProperty implements TransformationInterface
     {
         $property = $rule->getRule();
 
-        $rule->setRule(str_replace('left', 'right', $property));
+        $rule->setRule(str_replace('right', 'left', $property));
 
         return $rule;
     }

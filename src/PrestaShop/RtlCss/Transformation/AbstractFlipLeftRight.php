@@ -1,7 +1,7 @@
 <?php
-namespace MoodleHQ\RTLCSS\Transformation;
+namespace PrestaShop\RtlCss\Transformation;
 
-use MoodleHQ\RTLCSS\Transformation\Value\TransformableStringValue;
+use PrestaShop\RtlCss\Transformation\Value\TransformableStringValue;
 use Sabberworm\CSS\Rule\Rule;
 
 /**

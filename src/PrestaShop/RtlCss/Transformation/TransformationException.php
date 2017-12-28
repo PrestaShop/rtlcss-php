@@ -1,5 +1,5 @@
 <?php
-namespace MoodleHQ\RTLCSS\Transformation;
+namespace PrestaShop\RtlCss\Transformation;
 
 class TransformationException extends \Exception
 {

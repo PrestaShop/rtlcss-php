@@ -25,9 +25,9 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
-namespace MoodleHQ\RTLCSS\Transformation\Value;
+namespace PrestaShop\RtlCss\Transformation\Value;
 
-use MoodleHQ\RTLCSS\Transformation\TransformationException;
+use PrestaShop\RtlCss\Transformation\TransformationException;
 
 class TransformableStringValue
 {

@@ -1,5 +1,5 @@
 <?php
-namespace MoodleHQ\RTLCSS\Transformation;
+namespace PrestaShop\RtlCss\Transformation;
 
 /**
  * Flips values that are exactly 'left' to 'right'

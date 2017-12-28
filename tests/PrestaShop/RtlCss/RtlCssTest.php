@@ -1,11 +1,11 @@
 <?php
 
-namespace MoodleHQ\RTLCSS;
+namespace PrestaShop\RtlCss;
 
 use Sabberworm\CSS\Parser;
 use Sabberworm\CSS\OutputFormat;
 
-class RTLCSSTest extends \PHPUnit_Framework_TestCase {
+class RtlCssTest extends \PHPUnit_Framework_TestCase {
 
     public function backgroundImageProvider() {
         return [
@@ -1073,7 +1073,7 @@ class RTLCSSTest extends \PHPUnit_Framework_TestCase {
     protected function assertFlips($expected, $input, $description, $output = null) {
         $parser = new Parser($input);
         $tree = $parser->parse();
-        $rtlcss = new RTLCSS($tree);
+        $rtlcss = new RtlCss($tree);
         $flipped = $rtlcss->flip();
         $this->assertEquals($expected, $flipped->render($output), $description);
     }

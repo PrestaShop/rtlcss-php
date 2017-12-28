@@ -1,8 +1,8 @@
 <?php
 namespace CSSJanus;
 
-use MoodleHQ\RTLCSS\FlipOptions;
-use MoodleHQ\RTLCSS\RTLCSS;
+use PrestaShop\RtlCss\FlipOptions;
+use PrestaShop\RtlCss\RtlCss;
 use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Parser;
 
@@ -27,7 +27,7 @@ class CSSJanusTest extends \PHPUnit_Framework_TestCase
             ->setShouldFlipBackgroundPositionLengthValue(false)
             ->setShouldTreatBackgroundPositionZeroAsLengthValue(false)
         ;
-        $rtlcss = new RTLCSS($tree, $options);
+        $rtlcss = new RtlCss($tree, $options);
         $flipped = $rtlcss->flip();
 
         $this->assertEquals(

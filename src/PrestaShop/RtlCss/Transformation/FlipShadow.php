@@ -1,7 +1,7 @@
 <?php
-namespace MoodleHQ\RTLCSS\Transformation;
+namespace PrestaShop\RtlCss\Transformation;
 
-use MoodleHQ\RTLCSS\Transformation\Operation\SizeFlipper;
+use PrestaShop\RtlCss\Transformation\Operation\SizeFlipper;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\Value\RuleValueList;
 use Sabberworm\CSS\Value\Size;
